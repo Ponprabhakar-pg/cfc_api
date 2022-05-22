@@ -17,7 +17,7 @@ class Registration(BaseModel):
 
 
 @app.get("/")
-async def CFC():
+async def default():
     return {"message": "Hello there!"}
 
 
