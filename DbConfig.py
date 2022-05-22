@@ -1,0 +1,7 @@
+MongoDBConnectionString = "mongodb+srv://prabha:prabha123@cluster0.uvmcv.mongodb.net/"
+DBName = "ChennaiFreelancersClub"
+UserCollection = "User_Data"
+FreelancerCollection = "Freelancer"
+ClientCollection = "Client"
+WorkCollection = "Work"
+ProposalCollection = "Proposal"
