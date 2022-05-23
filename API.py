@@ -11,7 +11,7 @@ class Registration(BaseModel):
     username: str
     mail_id: str
     password: str
-    mobile: int
+    mobile: str
     user_type: str
     account_creation_type: str
 
