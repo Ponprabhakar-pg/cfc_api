@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-
+from Utils.ModalClasses import *
 from Validation import *
 
 app = FastAPI()
@@ -15,16 +14,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# Default Validation Modal's
-class Registration(BaseModel):
-    username: str
-    mail_id: str
-    password: str
-    mobile: str
-    user_type: str
-    account_creation_type: str
 
 
 @app.get("/")

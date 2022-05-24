@@ -4,70 +4,10 @@ from uuid import uuid4
 from datetime import datetime
 
 from DbConfig import *
+from Utils.HelperDictionaries import *
 
 my_client = pymongo.MongoClient(MongoDBConnectionString)
 my_db = my_client[DBName]
-
-client_data = {
-    "_id": "",
-    "username": "",
-    "mail_id": "",
-    "mobile": "",
-    "password": "",
-    "address": "",
-    "dob": "",
-    "description": "",
-    "expected_skills": [],
-    "user_type": "client",
-    "account_creation_type": "",
-    "mail_verification_status": 0,
-    "account_status": 0,
-    "profile_picture": "",
-    "posted_work": [],
-    "ongoing_work": [],
-    "finished_work": [],
-    "feedbacks": [],
-    "created_at": ""
-}
-
-user_data = {
-    "_id": "",
-    "username": "",
-    "mail_id": "",
-    "mobile": "",
-    "password": "",
-    "user_type": "freelancer",
-    "account_creation_type": "",
-}
-
-freelancer_data = {
-    "_id": "",
-    "username": "",
-    "mail_id": "",
-    "mobile": "",
-    "password": "",
-    "address": "",
-    "dob": "",
-    "description": "",
-    "skills": [],
-    "user_type": "freelancer",
-    "account_creation_type": "",
-    "mail_verification_status": 0,
-    "account_status": 0,
-    "profile_picture": "",
-    "applied_proposal": [],
-    "ongoing_proposal": [],
-    "finished_proposal": [],
-    "feedbacks": [],
-    "created_at": ""
-}
-
-feedback = {
-    "name": "",
-    "feedback": "",
-    "rating": 0.0
-}
-
 
 async def login_core(mail_id):
     my_col = my_db[UserCollection]
@@ -81,8 +21,8 @@ async def registration_client_core(registration_data):
     my_col1 = my_db[ClientCollection]
     my_col2 = my_db[UserCollection]
 
-    client = client_data.copy()
-    overall_user = user_data.copy()
+    client = client_dict.copy()
+    overall_user = user_dict.copy()
 
     client['created_at'] = str(datetime.now())
     client['username'] = registration_data.username
@@ -111,8 +51,8 @@ async def registration_freelancer_core(registration_data):
     my_col1 = my_db[FreelancerCollection]
     my_col2 = my_db[UserCollection]
 
-    freelancer = freelancer_data.copy()
-    overall_user = user_data.copy()
+    freelancer = freelancer_dict.copy()
+    overall_user = user_dict.copy()
 
     freelancer['_id'] = str(uuid4())
     freelancer['created_at'] = str(datetime.now())
