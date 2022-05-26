@@ -30,10 +30,37 @@ async def login(mail_id: str):
 async def register(registration_data: Registration):
     return await register_validation(registration_data)
 
+
 @app.get("/get_client_by_mail_id/{mail_id}")
 async def get_client_by_mail_id(mail_id: str):
     return await get_client_by_mail_id_validation(mail_id)
 
+
 @app.get("/get_freelancer_by_mail_id/{mail_id}")
 async def get_freelancer_by_mail_id(mail_id: str):
     return await get_freelancer_by_mail_id_validation(mail_id)
+
+
+@app.post("/post_work")
+async def post_work(work_data: Work):
+    return await post_work_validation(work_data)
+
+
+@app.get("/get_active_work")
+async def get_active_work():
+    return await get_active_work_validation()
+
+
+@app.get("/get_ongoing_work/{freelancer_id}")
+async def get_ongoing_work(freelancer_id: str):
+    return await get_ongoing_work_validation(freelancer_id)
+
+
+@app.get("/get_finished_work/{freelancer_id}")
+async def get_finished_work(freelancer_id: str):
+    return await get_finish_work_validation(freelancer_id)
+
+@app.post("/create_proposal")
+async def create_proposal(proposal_data: Proposal):
+    return await create_proposal_validation(proposal_data)
+

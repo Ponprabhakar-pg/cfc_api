@@ -52,6 +52,35 @@ freelancer_dict = {
     "created_at": ""
 }
 
+
+work_dict = {
+    "_id": "",
+    "title": "",
+    "short_description": "",
+    "long_description": "",
+    "amount": "",
+    "duration": "",
+    "client_id": "",
+    "documents": "",
+    "skills_required": [],
+    "work_status": 0,
+    "accepted_proposal_id": "",
+    "created_at": ""
+}
+
+proposal_dict = {
+    "_id": "",
+    "work_id": "",
+    "client_id": "",
+    "freelancer_id": "",
+    "bid_amount":"",
+    "bid_duration": "",
+    "bid_description": "",
+    "proposal_status": 0,
+    "created_at": ""
+}
+
+
 feedback_dict = {
     "name": "",
     "feedback": "",
