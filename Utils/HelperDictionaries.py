@@ -65,7 +65,8 @@ work_dict = {
     "skills_required": [],
     "work_status": 0,
     "accepted_proposal_id": "",
-    "created_at": ""
+    "created_at": "",
+    "proposals": []
 }
 
 proposal_dict = {

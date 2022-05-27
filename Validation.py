@@ -37,14 +37,26 @@ async def post_work_validation(work_data):
 
 
 async def get_active_work_validation():
-    return get_active_work_core()
+    return await get_active_work_core()
 
 
 async def get_ongoing_work_validation(freelancer_id):
-    return get_ongoing_work_core(freelancer_id)
+    return await get_ongoing_work_core(freelancer_id)
 
 async def get_finish_work_validation(freelancer_id):
-    return get_finish_work_core(freelancer_id)
+    return await get_finish_work_core(freelancer_id)
 
 async def create_proposal_validation(proposal_data):
-    return create_proposal_core(proposal_data)
+    return await create_proposal_core(proposal_data)
+
+async def stop_accepting_work_proposal_validation(work_id):
+    return await stop_accepting_work_proposal_core(work_id)
+
+async def selected_proposal_for_work_validation(proposal_id):
+    return await selected_proposal_for_work_core(proposal_id)
+
+async def update_client_profile_validation(client_id, username, mobile, address, dob, description, expected_skills):
+    return await update_client_profile_core(client_id, username, mobile, address, dob, description, expected_skills)
+
+async def update_freelancer_profile_validation(freelancer_id, username, mobile, address, dob, description, skills):
+    return await update_freelancer_profile_core(freelancer_id, username, mobile, address, dob, description, skills)

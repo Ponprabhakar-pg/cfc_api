@@ -9,6 +9,7 @@ from Utils.HelperDictionaries import *
 my_client = pymongo.MongoClient(MongoDBConnectionString)
 my_db = my_client[DBName]
 
+
 async def login_core(mail_id):
     my_col = my_db[UserCollection]
     user_data = my_col.find_one({"mail_id": mail_id})
@@ -93,8 +94,10 @@ async def get_freelancer_by_mail_id_core(mail_id):
         raise HTTPException(status_code=500, detail="No Freelancer Exist")
     return freelancer
 
+
 async def post_work_core(work_data):
     my_col = my_db[WorkCollection]
+    client_col = my_db[ClientCollection]
     work = work_dict.copy()
     work['_id'] = str(uuid4())
     work['created_at'] = str(datetime.now())
@@ -107,28 +110,51 @@ async def post_work_core(work_data):
     work['documents'] = work_data.documents
     work['skills_required'] = work_data.skills_required
 
+    client_col.replace_one({"_id": work['client_id']}, {'$push': {'posted_work': work['_id']}})
     my_col.insert_one(work)
     return {"message": "Work Created Successfully"}
 
 
 async def get_active_work_core():
-    my_col = my_db[WorkCollection]
-    work_array = my_col.find({"work_status": 0})
+    work_col = my_db[WorkCollection]
+    work_array = work_col.find({"work_status": 0})
     return work_array
+
 
 async def get_ongoing_work_core(freelancer_id):
-    my_col = my_db[WorkCollection]
-    work_array = my_col.find({"work_status": 2})
-    return work_array
+    work_col = my_db[WorkCollection]
+    freelancer_col = my_db[FreelancerCollection]
+    client_col = my_db[ClientCollection]
+    freelancer_data = freelancer_col.find_one({'_id': freelancer_id})
+    if (freelancer_data['ongoing_work']) > 0:
+        ongoing_work = []
+        for work_id in freelancer_data['ongoing_work']:
+            work = work_col.find_one({'_id': work_id})
+            work['client_details'] = client_col.find_one({'_id': work['client_id']})
+            ongoing_work.append(work)
+        return ongoing_work
+    return []
+
 
 async def get_finish_work_core(freelancer_id):
-    my_col = my_db[WorkCollection]
-    work_array = my_col.find({"work_status": 3})
-    return work_array
+    work_col = my_db[WorkCollection]
+    freelancer_col = my_db[FreelancerCollection]
+    client_col = my_db[ClientCollection]
+    freelancer_data = freelancer_col.find_one({'_id': freelancer_id})
+    if (freelancer_data['finished_work']) > 0:
+        finished_work = []
+        for work_id in freelancer_data['finished_work']:
+            work = work_col.find_one({'_id': work_id})
+            work['client_details'] = client_col.find_one({'_id': work['client_id']})
+            finished_work.append(work)
+        return finished_work
+    return []
 
 
 async def create_proposal_core(proposal_data):
-    my_col = my_db[ProposalCollection]
+    proposal_col = my_db[ProposalCollection]
+    work_col = my_db[WorkCollection]
+    freelancer_col = my_db[FreelancerCollection]
     proposal = proposal_dict.copy()
     proposal['_id'] = str(uuid4())
     proposal['created_at'] = str(datetime.now())
@@ -138,5 +164,50 @@ async def create_proposal_core(proposal_data):
     proposal['bid_amount'] = proposal_data.bid_amount
     proposal['bid_duration'] = proposal_data.bid_duration
     proposal['bid_description'] = proposal_data.bid_description
-    my_col.insert_one(proposal)
-    return {"message": "Proposal Created Successfully"}
+    proposal_col.insert_one(proposal)
+    work_col.update_one({"_id": proposal['work_id']}, {'$push': {'proposals': proposal['_id']}})
+    result = freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'applied_work': proposal['_id']}})
+    if result.modified_count > 0:
+        return {"message": "Proposal Created Successfully"}
+    else:
+        return {"message": "Unable to create proposal"}
+
+
+async def stop_accepting_work_proposal_core(work_id):
+    work_col = my_db[WorkCollection]
+    result = work_col.update_one({'_id': work_id}, {'$set': {'work_status': 1}})
+    if result.modified_count > 0:
+        return True
+    else:
+        return False
+
+async def selected_proposal_for_work_core(proposal_id):
+    proposal_col = my_db[ProposalCollection]
+    client_col = my_db[ClientCollection]
+    freelancer_col = my_db[FreelancerCollection]
+    work_col = my_db[WorkCollection]
+    proposal = proposal_col.find_one({'_id': proposal_id})
+    freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'ongoing_proposal': proposal_id}})
+    work_col.update_one({'_id': proposal['work_id']}, {'$set': {'accepted_proposal_id': proposal['_id']}})
+    work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 2}})
+    result = client_col.update_one({'_id': proposal['client_id']}, {'$set': {'ongoing_work': proposal['work_id']}})
+    if result.modified_count > 0:
+        return True
+    else:
+        return False
+
+async def update_client_profile_core(client_id, username, mobile, address, dob, description, expected_skills):
+    client_col = my_db[ClientCollection]
+    result = client_col.update_one({'_id': client_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': expected_skills}})
+    if result.modified_count > 0:
+        return True
+    else:
+        return False
+
+async def update_freelancer_profile_core(freelancer_id, username, mobile, address, dob, description, skills):
+    freelancer_col = my_db[FreelancerCollection]
+    result = freelancer_col.update_one({'_id': freelancer_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': skills}})
+    if result.modified_count > 0:
+        return True
+    else:
+        return False
