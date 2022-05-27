@@ -75,9 +75,9 @@ async def selected_proposal_for_work(proposal_id):
     return await selected_proposal_for_work_validation(proposal_id)
 
 @app.put("/update_client_profile/{client_id}/{username}/{mobile}/{address}/{dob}/{description}/{expected_skills}")
-async def update_client_profile(client_id, username, mobile, address, dob, description, expected_skills):
+async def update_client_profile(client_id: str, username: str, mobile: str, address: str, dob: str, description: str, expected_skills: list):
     return await update_client_profile_validation(client_id, username, mobile, address, dob, description, expected_skills)
 
 @app.put("/update_freelancer_profile/{client_id}/{username}/{mobile}/{address}/{dob}/{description}/{skills}")
-async def update_freelancer_profile(freelancer_id, username, mobile, address, dob, description, skills):
+async def update_freelancer_profile(freelancer_id: str, username: str, mobile: str, address: str, dob: str, description: str, skills: list):
     return await update_freelancer_profile_validation(freelancer_id, username, mobile, address, dob, description, skills)
