@@ -26,7 +26,7 @@ user_dict = {
     "mail_id": "",
     "mobile": "",
     "password": "",
-    "user_type": "freelancer",
+    "user_type": "",
     "account_creation_type": "",
 }
 

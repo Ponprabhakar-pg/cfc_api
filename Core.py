@@ -38,6 +38,7 @@ async def registration_client_core(registration_data):
     overall_user['username'] = registration_data.username
     overall_user['password'] = registration_data.password
     overall_user['mail_id'] = registration_data.mail_id
+    overall_user['user_type'] = "client"
     overall_user['account_creation_type'] = registration_data.account_creation_type
     overall_user['mobile'] = registration_data.mobile
     if my_col2.find_one({"mail_id": registration_data.mail_id}) is not None:
@@ -68,6 +69,7 @@ async def registration_freelancer_core(registration_data):
     overall_user['username'] = registration_data.username
     overall_user['password'] = registration_data.password
     overall_user['mail_id'] = registration_data.mail_id
+    overall_user['user_type'] = "freelancer"
     overall_user['account_creation_type'] = registration_data.account_creation_type
     overall_user['mobile'] = registration_data.mobile
     if my_col2.find_one({"mail_id": registration_data.mail_id}) is not None:
