@@ -206,6 +206,9 @@ async def selected_proposal_for_work_core(proposal_id):
 async def update_client_profile_core(client_id, username, mobile, address, dob, description, expected_skills):
     client_col = my_db[ClientCollection]
     result = client_col.update_one({'_id': client_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': expected_skills, 'profile_status': 1}})
+    client = client_col.find_one({'mail_id': client_id})
+    if client['mail_verification_status'] == 1:
+        client_col.update_one({'mail_id': client_id}, {'$set': {'account_status': 1}})
     if result.modified_count > 0:
         return True
     else:
@@ -213,7 +216,10 @@ async def update_client_profile_core(client_id, username, mobile, address, dob, 
 
 async def update_freelancer_profile_core(freelancer_id, username, mobile, address, dob, description, skills, linked_in):
     freelancer_col = my_db[FreelancerCollection]
-    result = freelancer_col.update_one({'_id': freelancer_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': skills, 'linked_in': linked_in, 'profile_status': 1}})
+    result = freelancer_col.update_one({'_id': freelancer_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'skills': skills, 'linked_in': linked_in, 'profile_status': 1}})
+    freelancer = freelancer_col.find_one({'_id': freelancer_id})
+    if freelancer['mail_verification_status'] == 1:
+        freelancer_col.update_one({'mail_id': freelancer_id}, {'$set': {'account_status': 1}})
     if result.modified_count > 0:
         return True
     else:
@@ -278,14 +284,20 @@ async def mail_verified_core(mail_id):
     my_col = my_db[UserCollection]
     user_data = my_col.find_one({'mail_id': mail_id})
     if user_data['user_type'] == 'freelancer':
-        my_col = my_db[FreelancerCollection]
-        result = my_col.update_one({'mail_id': mail_id}, {'$set': {'mail_verification_status': 1}})
+        freelancer_col = my_db[FreelancerCollection]
+        result = freelancer_col.update_one({'mail_id': mail_id}, {'$set': {'mail_verification_status': 1}})
+        freelancer = freelancer_col.find_one({'mail_id': mail_id})
+        if freelancer['profile_status'] == 1:
+            freelancer_col.update_one({'mail_id': mail_id}, {'$set': {'account_status': 1}})
         if result.modified_count > 0:
             return True
         return False
     else:
-        my_col = my_db[ClientCollection]
-        result = my_col.update_one({'mail_id': mail_id}, {'$set': {'mail_verification_status': 1}})
+        client_col = my_db[ClientCollection]
+        result = client_col.update_one({'mail_id': mail_id}, {'$set': {'mail_verification_status': 1}})
+        client = client_col.find_one({'mail_id': mail_id})
+        if client['profile_status'] == 1:
+            client_col.update_one({'mail_id': mail_id}, {'$set': {'account_status': 1}})
         if result.modified_count > 0:
             return True
         return False
