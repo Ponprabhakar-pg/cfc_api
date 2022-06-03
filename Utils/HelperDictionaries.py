@@ -11,8 +11,10 @@ client_dict = {
     "user_type": "client",
     "account_creation_type": "",
     "mail_verification_status": 0,
+    "profile_status": 0,
     "account_status": 0,
     "profile_picture": "",
+    "linked_in": "",
     "posted_work": [],
     "ongoing_work": [],
     "finished_work": [],
@@ -43,6 +45,7 @@ freelancer_dict = {
     "user_type": "freelancer",
     "account_creation_type": "",
     "mail_verification_status": 0,
+    "profile_status": 0,
     "account_status": 0,
     "profile_picture": "",
     "applied_proposal": [],
@@ -83,7 +86,7 @@ proposal_dict = {
 
 
 feedback_dict = {
-    "name": "",
+    "work_id": "",
     "feedback": "",
     "rating": 0.0
 }

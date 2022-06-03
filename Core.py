@@ -2,9 +2,11 @@ import pymongo
 from fastapi import HTTPException
 from uuid import uuid4
 from datetime import datetime
+from random import randint
 
 from Utils.DBConfig import *
 from Utils.HelperDictionaries import *
+from Utils.Mailer import mail_trigger
 
 my_client = pymongo.MongoClient(MongoDBConnectionString)
 my_db = my_client[DBName]
@@ -84,6 +86,7 @@ async def registration_freelancer_core(registration_data):
 async def get_client_by_mail_id_core(mail_id):
     my_col = my_db[ClientCollection]
     client = my_col.find_one({"mail_id": mail_id})
+    client['password'] = "******"
     if client is None:
         raise HTTPException(status_code=500, detail="No Client Exist")
     return client
@@ -92,6 +95,7 @@ async def get_client_by_mail_id_core(mail_id):
 async def get_freelancer_by_mail_id_core(mail_id):
     my_col = my_db[FreelancerCollection]
     freelancer = my_col.find_one({"mail_id": mail_id})
+    freelancer['password'] = "******"
     if freelancer is None:
         raise HTTPException(status_code=500, detail="No Freelancer Exist")
     return freelancer
@@ -189,10 +193,11 @@ async def selected_proposal_for_work_core(proposal_id):
     freelancer_col = my_db[FreelancerCollection]
     work_col = my_db[WorkCollection]
     proposal = proposal_col.find_one({'_id': proposal_id})
+    proposal_col.update_one({'_id': proposal_id}, {'$set': {'proposal_status': 1}})
     freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'ongoing_proposal': proposal_id}})
     work_col.update_one({'_id': proposal['work_id']}, {'$set': {'accepted_proposal_id': proposal['_id']}})
     work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 2}})
-    result = client_col.update_one({'_id': proposal['client_id']}, {'$set': {'ongoing_work': proposal['work_id']}})
+    result = client_col.update_one({'_id': proposal['client_id']}, {'$push': {'ongoing_work': proposal['work_id']}})
     if result.modified_count > 0:
         return True
     else:
@@ -200,16 +205,87 @@ async def selected_proposal_for_work_core(proposal_id):
 
 async def update_client_profile_core(client_id, username, mobile, address, dob, description, expected_skills):
     client_col = my_db[ClientCollection]
-    result = client_col.update_one({'_id': client_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': expected_skills}})
+    result = client_col.update_one({'_id': client_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': expected_skills, 'profile_status': 1}})
     if result.modified_count > 0:
         return True
     else:
         return False
 
-async def update_freelancer_profile_core(freelancer_id, username, mobile, address, dob, description, skills):
+async def update_freelancer_profile_core(freelancer_id, username, mobile, address, dob, description, skills, linked_in):
     freelancer_col = my_db[FreelancerCollection]
-    result = freelancer_col.update_one({'_id': freelancer_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': skills}})
+    result = freelancer_col.update_one({'_id': freelancer_id}, {'$set': {'username': username, 'mobile': mobile, 'address': address, 'dob': dob, 'description': description, 'expected_skills': skills, 'linked_in': linked_in, 'profile_status': 1}})
     if result.modified_count > 0:
         return True
     else:
+        return False
+
+
+async def freelancer_finish_work_core(proposal_id, feedback_rating, feedback_comment):
+    proposal_col = my_db[ProposalCollection]
+    client_col = my_db[ClientCollection]
+    freelancer_col = my_db[FreelancerCollection]
+    work_col = my_db[WorkCollection]
+    proposal = proposal_col.find_one({'_id': proposal_id})
+    proposal_col.update_one({'_id': proposal_id}, {'$set': {'proposal_status': 2}})
+    feedback = feedback_dict.copy()
+    feedback['work_id'] = proposal['work_id']
+    feedback['feedback'] = feedback_comment
+    feedback['rating'] = feedback_rating
+    client_col.update_one({'_id': proposal['client_id']}, {'$push': {'feedbacks': feedback}})
+    work = work_col.find_one({'_id': proposal['work_id']})
+    if(work['work_status'] == 2):
+        work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 3}})
+    else:
+        work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 5}})
+    result = freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'finished_proposal': proposal_id}})
+    if result.modified_count > 0:
+        return True
+    else:
+        return False
+
+
+async def client_finish_work_core(proposal_id, feedback_rating, feedback_comment):
+    proposal_col = my_db[ProposalCollection]
+    client_col = my_db[ClientCollection]
+    freelancer_col = my_db[FreelancerCollection]
+    work_col = my_db[WorkCollection]
+    proposal = proposal_col.find_one({'_id': proposal_id})
+    proposal_col.update_one({'_id': proposal_id}, {'$set': {'proposal_status': 2}})
+    feedback = feedback_dict.copy()
+    feedback['work_id'] = proposal['work_id']
+    feedback['feedback'] = feedback_comment
+    feedback['rating'] = feedback_rating
+    freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'feedbacks': feedback}})
+    work = work_col.find_one({'_id': proposal['work_id']})
+    if(work['work_status'] == 2):
+        work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 4}})
+    else:
+        work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 5}})
+    result = client_col.update_one({'_id': proposal['client_id']}, {'$push': {'finished_work': proposal['work_id']}})
+    if result.modified_count > 0:
+        return True
+    else:
+        return False
+
+
+async def verify_mail_core(mail_id):
+    otp = randint(100000, 999999)
+    await mail_trigger(mail_id,otp)
+    return {"OTP": otp}
+
+
+async def mail_verified_core(mail_id):
+    my_col = my_db[UserCollection]
+    user_data = my_col.find_one({'mail_id': mail_id})
+    if user_data['user_type'] == 'freelancer':
+        my_col = my_db[FreelancerCollection]
+        result = my_col.update_one({'mail_id': mail_id}, {'$set': {'mail_verification_status': 1}})
+        if result.modified_count > 0:
+            return True
+        return False
+    else:
+        my_col = my_db[ClientCollection]
+        result = my_col.update_one({'mail_id': mail_id}, {'$set': {'mail_verification_status': 1}})
+        if result.modified_count > 0:
+            return True
         return False
