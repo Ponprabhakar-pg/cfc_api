@@ -35,7 +35,7 @@ async def get_freelancer_by_mail_id_validation(mail_id):
 
 
 async def post_work_validation(work_data):
-    if work_data.title != "":
+    if work_data.title == "":
         raise HTTPException(status_code=500, detail="Invalid Title")
     return await post_work_core(work_data)
 
