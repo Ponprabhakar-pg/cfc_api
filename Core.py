@@ -124,7 +124,10 @@ async def post_work_core(work_data):
 async def get_active_work_core():
     work_col = my_db[WorkCollection]
     work_array = work_col.find({"work_status": 0})
-    return work_array
+    result = []
+    for work in work_array:
+        result.append(work)
+    return result
 
 
 async def get_ongoing_work_core(freelancer_id):
