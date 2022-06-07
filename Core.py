@@ -116,7 +116,7 @@ async def post_work_core(work_data):
     work['documents'] = work_data.documents
     work['skills_required'] = work_data.skills_required
 
-    client_col.replace_one({"_id": work['client_id']}, {'$push': {'posted_work': work['_id']}})
+    client_col.update_one({"_id": work['client_id']}, {'$push': {'posted_work': work['_id']}})
     my_col.insert_one(work)
     return {"message": "Work Created Successfully"}
 
