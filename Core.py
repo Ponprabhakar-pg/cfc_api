@@ -175,7 +175,7 @@ async def create_proposal_core(proposal_data):
     proposal['bid_description'] = proposal_data.bid_description
     proposal_col.insert_one(proposal)
     work_col.update_one({"_id": proposal['work_id']}, {'$push': {'proposals': proposal['_id']}})
-    result = freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'applied_work': proposal['_id']}})
+    result = freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'applied_proposal': proposal['_id']}})
     if result.modified_count > 0:
         return {"message": "Proposal Created Successfully"}
     else:
@@ -196,15 +196,17 @@ async def selected_proposal_for_work_core(proposal_id):
     freelancer_col = my_db[FreelancerCollection]
     work_col = my_db[WorkCollection]
     proposal = proposal_col.find_one({'_id': proposal_id})
-    proposal_col.update_one({'_id': proposal_id}, {'$set': {'proposal_status': 1}})
-    freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'ongoing_proposal': proposal_id}})
-    work_col.update_one({'_id': proposal['work_id']}, {'$set': {'accepted_proposal_id': proposal['_id']}})
-    work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 2}})
-    result = client_col.update_one({'_id': proposal['client_id']}, {'$push': {'ongoing_work': proposal['work_id']}})
-    if result.modified_count > 0:
-        return True
-    else:
-        return False
+    if proposal['proposal_status'] == 0:
+        proposal_col.update_one({'_id': proposal_id}, {'$set': {'proposal_status': 1}})
+        freelancer_col.update_one({'_id': proposal['freelancer_id']}, {'$push': {'ongoing_proposal': proposal_id}})
+        work_col.update_one({'_id': proposal['work_id']}, {'$set': {'accepted_proposal_id': proposal['_id']}})
+        work_col.update_one({'_id': proposal['work_id']}, {'$set': {'work_status': 2}})
+        result = client_col.update_one({'_id': proposal['client_id']}, {'$push': {'ongoing_work': proposal['work_id']}})
+        if result.modified_count > 0:
+            return True
+        else:
+            return False
+    return False
 
 async def update_client_profile_core(client_id, username, mobile, address, dob, description, expected_skills):
     client_col = my_db[ClientCollection]
