@@ -65,6 +65,9 @@ async def get_finished_work(freelancer_id: str):
 async def create_proposal(proposal_data: Proposal):
     return await create_proposal_validation(proposal_data)
 
+@app.get("/get_work_proposal/{work_id}")
+async def get_work_proposal(work_id):
+    return await get_work_proposal_validation(work_id)
 
 @app.put("/stop_accepting_work_proposal/{work_id}")
 async def stop_accepting_work_proposal(work_id):

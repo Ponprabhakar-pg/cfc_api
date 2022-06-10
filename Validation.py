@@ -56,6 +56,10 @@ async def create_proposal_validation(proposal_data):
     return await create_proposal_core(proposal_data)
 
 
+async def get_work_proposal_validation(work_id):
+    return await get_work_proposal_core(work_id)
+
+
 async def stop_accepting_work_proposal_validation(work_id):
     return await stop_accepting_work_proposal_core(work_id)
 

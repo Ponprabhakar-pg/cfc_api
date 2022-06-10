@@ -181,6 +181,15 @@ async def create_proposal_core(proposal_data):
     else:
         return {"message": "Unable to create proposal"}
 
+async def get_work_proposal_core(work_id):
+    proposal_col = my_db[ProposalCollection]
+    result = []
+    proposals = proposal_col.find({'work_id': work_id})
+    for proposal in proposals:
+        result.append(proposal)
+    return result
+
+
 
 async def stop_accepting_work_proposal_core(work_id):
     work_col = my_db[WorkCollection]
