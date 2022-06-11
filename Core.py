@@ -133,13 +133,16 @@ async def get_active_work_core():
 async def get_ongoing_work_core(freelancer_id):
     work_col = my_db[WorkCollection]
     freelancer_col = my_db[FreelancerCollection]
+    proposal_col = my_db[ProposalCollection]
     client_col = my_db[ClientCollection]
     freelancer_data = freelancer_col.find_one({'_id': freelancer_id})
-    if (freelancer_data['ongoing_work']) > 0:
+    if len(freelancer_data['ongoing_proposal']) > 0:
         ongoing_work = []
-        for work_id in freelancer_data['ongoing_work']:
-            work = work_col.find_one({'_id': work_id})
+        for proposal_id in freelancer_data['ongoing_proposal']:
+            proposal = proposal_col.find_one({'_id': proposal_id})
+            work = work_col.find_one({'_id': proposal['work_id']})
             work['client_details'] = client_col.find_one({'_id': work['client_id']})
+            work['proposal_details'] = proposal
             ongoing_work.append(work)
         return ongoing_work
     return []
@@ -149,12 +152,15 @@ async def get_finish_work_core(freelancer_id):
     work_col = my_db[WorkCollection]
     freelancer_col = my_db[FreelancerCollection]
     client_col = my_db[ClientCollection]
+    proposal_col = my_db[ProposalCollection]
     freelancer_data = freelancer_col.find_one({'_id': freelancer_id})
-    if (freelancer_data['finished_work']) > 0:
+    if (len(freelancer_data['finished_proposal'])) > 0:
         finished_work = []
-        for work_id in freelancer_data['finished_work']:
-            work = work_col.find_one({'_id': work_id})
+        for proposal_id in freelancer_data['finished_proposal']:
+            proposal = proposal_col.find_one({'_id': proposal_id})
+            work = work_col.find_one({'_id': proposal['work_id']})
             work['client_details'] = client_col.find_one({'_id': work['client_id']})
+            work['proposal_details'] = proposal
             finished_work.append(work)
         return finished_work
     return []
