@@ -74,6 +74,16 @@ async def stop_accepting_work_proposal(work_id):
     return await stop_accepting_work_proposal_validation(work_id)
 
 
+@app.get("/get_client_ongoing_work/{client_id}")
+async def get_client_ongoing_work(client_id):
+    return await get_client_ongoing_work_validation(client_id)
+
+
+@app.get("/get_client_finished_work/{client_id}")
+async def get_client_finished_work(client_id):
+    return await get_client_finished_work_validation(client_id)
+
+
 @app.put("/selected_proposal_for_work/{proposal_id}")
 async def selected_proposal_for_work(proposal_id):
     return await selected_proposal_for_work_validation(proposal_id)

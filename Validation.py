@@ -68,6 +68,14 @@ async def selected_proposal_for_work_validation(proposal_id):
     return await selected_proposal_for_work_core(proposal_id)
 
 
+async def get_client_ongoing_work_validation(client_id):
+    return await get_client_ongoing_work_core(client_id)
+
+
+async def get_client_finished_work_validation(client_id):
+    return await get_client_finished_work_core(client_id)
+
+
 async def update_client_profile_validation(client_id, username, mobile, address, dob, description, expected_skills):
     return await update_client_profile_core(client_id, username, mobile, address, dob, description, expected_skills)
 
