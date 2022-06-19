@@ -44,6 +44,11 @@ async def get_active_work_validation():
     return await get_active_work_core()
 
 
+
+async def get_work_by_id_validation(work_id):
+    return await get_work_by_id_core(work_id)
+
+
 async def get_ongoing_work_validation(freelancer_id):
     return await get_ongoing_work_core(freelancer_id)
 

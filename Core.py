@@ -133,6 +133,14 @@ async def get_active_work_core():
     return result
 
 
+async def get_work_by_id_core(work_id):
+    work_col = my_db[WorkCollection]
+    client_col = my_db[ClientCollection]
+    work_data = work_col.find_one({"_id": work_id})
+    work_data["client_details"] = client_col.find_one({"_id": work_data['client_id']})
+    return work_data
+
+
 async def get_ongoing_work_core(freelancer_id):
     work_col = my_db[WorkCollection]
     freelancer_col = my_db[FreelancerCollection]
